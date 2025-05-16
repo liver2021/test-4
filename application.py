@@ -1,7 +1,15 @@
 from flask import Flask, render_template
+from flask_sqlalchemy import SQLAlchemy
+
 import os
 
 application = Flask(__name__)
+
+application.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres1234@database-2.cal68me0ewga.us-east-1.rds.amazonaws.com:5432/database-2'
+application.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+db = SQLAlchemy(application)
+
 
 @application.route('/')
 def hello_world():
