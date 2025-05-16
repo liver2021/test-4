@@ -1,15 +1,44 @@
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
+import boto3
 from sqlalchemy.exc import OperationalError
-import psycopg2
 from sqlalchemy import text
 import os
+import json
 
 
 
 application = Flask(__name__)
+def get_secret():
+    secret_name = "db/secret"  # Replace with your secret name
+    region_name = "us-east-1"  # Replace with your region
 
-application.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres1234@database-3.cal68me0ewga.us-east-1.rds.amazonaws.com:5432/database3'
+    # Create a Secrets Manager client
+    session = boto3.session.Session()
+    client = session.client(
+        service_name='secretsmanager',
+        region_name=region_name
+    )
+
+    try:
+        response = client.get_secret_value(SecretId=secret_name)
+    except Exception as e:
+        print("Failed to fetch secret:", e)
+        raise e
+
+    secret = json.loads(response['SecretString'])
+    return secret
+
+# Get credentials from Secrets Manager
+creds = get_secret()
+user = creds['username']
+password = creds['password']
+host = creds['host']
+port = creds['port']
+dbname = creds['dbname']
+print("Hello this is Database Name:", dbname)
+
+application.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://{user}:{password}@{host}:{port}/{dbname}'
 application.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(application)
