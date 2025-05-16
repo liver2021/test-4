@@ -18,8 +18,10 @@ db = SQLAlchemy(application)
 @application.route('/')
 def hello_world():
     try:
-        db.session.execute(text('SELECT 1'))
-        message = "✅ Successfully connected to the PostgreSQL database."
+        with db.engine.connect() as connection:
+            connection.execute(text('SELECT 1'))
+            message = "✅ Successfully connected to the PostgreSQL database."
+
     except OperationalError as e:
         message = f"❌ Failed to connect to the PostgreSQL database: {e}"
     return render_template('hello.html', message=message)
