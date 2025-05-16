@@ -1,6 +1,8 @@
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import OperationalError
+from sqlalchemy import text
+
 
 import os
 
@@ -16,7 +18,7 @@ db = SQLAlchemy(application)
 @application.route('/')
 def hello_world():
     try:
-        db.session.execute('SELECT 1')
+        db.session.execute(text('SELECT 1'))
         message = "✅ Successfully connected to the PostgreSQL database."
     except OperationalError as e:
         message = f"❌ Failed to connect to the PostgreSQL database: {e}"
