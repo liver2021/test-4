@@ -1,5 +1,6 @@
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import OperationalError
 
 import os
 
@@ -11,9 +12,15 @@ application.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(application)
 
 
+
 @application.route('/')
 def hello_world():
-    return render_template('hello.html')
+    try:
+        db.session.execute('SELECT 1')
+        message = "✅ Successfully connected to the PostgreSQL database."
+    except OperationalError as e:
+        message = f"❌ Failed to connect to the PostgreSQL database: {e}"
+    return render_template('hello.html', message=message)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
